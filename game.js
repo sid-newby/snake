@@ -143,7 +143,7 @@ function update() {
         gameOver = true;
         backgroundMusic.stop();
         gameOverSound.play();
-        this.add.text(800, 450, 'Game Over!', { fontSize: '64px', fill: '#fff' }).setOrigin(0.5);
+        this.add.text(800, 450, 'Game Over!', { fontSize: '200px', fill: '#fff' }).setOrigin(0.5);
         this.scene.pause();
     }
 }
