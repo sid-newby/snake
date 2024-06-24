@@ -40,16 +40,18 @@ function preload() {
 }
 
 function create() {
-    this.add.image(1600, 900, 'background').setScale(2.4);
+    // Center the background
+    this.add.image(800, 450, 'background').setDisplaySize(1600, 900);
 
     snakeBody = this.add.group();
     
-    face = this.add.image(960, 540, 'face').setScale(0.5);
+    face = this.add.image(800, 450, 'face').setScale(0.5);
     face.setDepth(1);  // Set face depth to 1 (above 0)
 
-    pestControl = this.add.image(100, 100, 'pest').setScale(0.4);
-    unicorn = this.add.image(1800, 900, 'unicorn').setScale(0.2);
-    bumblebee = this.add.image(200, 100, 'bumblebee').setScale(0.7);
+    // Scale other elements relative to face
+    pestControl = this.add.image(100, 100, 'pest').setScale(face.scale * 1.5);
+    unicorn = this.add.image(1500, 800, 'unicorn').setScale(face.scale * 1.75);
+    bumblebee = this.add.image(200, 100, 'bumblebee').setScale(face.scale * 0.7);
 
     cursors = this.input.keyboard.createCursorKeys();
 
@@ -58,7 +60,7 @@ function create() {
     gameOverSound = this.sound.add('gameover');
     backgroundMusic = this.sound.add('bgmusic', { loop: true, volume: 0.5 });
 
-    startButton = this.add.text(960, 540, 'Start Game', { fontSize: '64px', fill: '#fff' })
+    startButton = this.add.text(800, 450, 'Start Game', { fontSize: '64px', fill: '#fff' })
         .setOrigin(0.5)
         .setInteractive()
         .on('pointerdown', startGame.bind(this));
@@ -67,13 +69,13 @@ function create() {
 }
 
 function startGame() {
-    startButton.setVisible(true);
+    startButton.setVisible(false);
     gameStarted = true;
     backgroundMusic.play();
     
     // Create the long snake body
     for (let i = 0; i < 25; i++) {
-        let segment = snakeBody.create(960 - i * 30, 540, 'body').setScale(1);
+        let segment = snakeBody.create(800 - i * 30, 450, 'body').setScale(face.scale * 0.8);
         segment.setDepth(0);  // Ensure all body segments are at depth 0 (below face)
     }
 }
@@ -122,7 +124,7 @@ function update() {
         gameOver = true;
         backgroundMusic.stop();
         gameOverSound.play();
-        this.add.text(960, 540, 'Game Over!', { fontSize: '64px', fill: '#fff' }).setOrigin(0.5);
+        this.add.text(800, 450, 'Game Over!', { fontSize: '64px', fill: '#fff' }).setOrigin(0.5);
         this.scene.pause();
     }
 }
