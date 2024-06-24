@@ -55,9 +55,9 @@ function create() {
     face.setDepth(1);
 
     // Position enemies far from the initial snake position
-    pestControl = this.add.image(700, 700, 'pest').setScale(face.scale * 1);
-    unicorn = this.add.image(800, 800, 'unicorn').setScale(face.scale * .75);
-    bumblebee = this.add.image(400, 400, 'bumblebee').setScale(face.scale * 0.5);
+    pestControl = this.add.image(100, 100, 'pest').setScale(face.scale * 1.5);
+    unicorn = this.add.image(1500, 800, 'unicorn').setScale(face.scale * 1.75);
+    bumblebee = this.add.image(200, 100, 'bumblebee').setScale(face.scale * 0.7);
 
     cursors = this.input.keyboard.createCursorKeys();
     touchPointer = this.input.activePointer;
