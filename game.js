@@ -40,7 +40,7 @@ function preload() {
 }
 
 function create() {
-    this.add.image(960, 540, 'background').setScale(2.4);
+    this.add.image(1600, 900, 'background').setScale(2.4);
 
     snakeBody = this.add.group();
     
