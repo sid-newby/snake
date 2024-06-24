@@ -1,7 +1,7 @@
 const config = {
     type: Phaser.AUTO,
-    width: 800,
-    height: 600,
+    width: 1920,
+    height: 1080,
     scene: {
         preload: preload,
         create: create,
@@ -25,7 +25,7 @@ function create() {
     face = this.add.image(400, 300, 'face');
     face.setScale(0.2);  // Adjust this value to resize your face image
 
-    pestControl = this.add.image(100, 100, 'pest');
+    pestControl = this.add.image(500, 500, 'pest');
     pestControl.setScale(0.1);  // Adjust this value as needed
 
     cursors = this.input.keyboard.createCursorKeys();
