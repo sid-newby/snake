@@ -1,7 +1,12 @@
 const config = {
     type: Phaser.AUTO,
-    width: 1600,
-    height: 900,
+    scale: {
+        mode: Phaser.Scale.FIT,
+        parent: 'phaser-example',
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 1600,
+        height: 900
+    },
     scene: {
         preload: preload,
         create: create,
@@ -24,6 +29,7 @@ let gameOver = false;
 let moveSound, collectSound, gameOverSound, backgroundMusic;
 let startButton;
 let gameStarted = false;
+let touchPointer;
 
 function preload() {
     this.load.image('face', 'assets/your-face.png');
@@ -40,20 +46,19 @@ function preload() {
 }
 
 function create() {
-    // Center the background
     this.add.image(800, 450, 'background').setDisplaySize(1600, 900);
 
     snakeBody = this.add.group();
     
-    face = this.add.image(800, 450, 'face').setScale(1);
-    face.setDepth(1);  // Set face depth to 1 (above 0)
+    face = this.add.image(800, 450, 'face').setScale(0.5);
+    face.setDepth(1);
 
-    // Scale other elements relative to face
-    pestControl = this.add.image(100, 100, 'pest').setScale(face.scale * 1);
-    unicorn = this.add.image(1500, 800, 'unicorn').setScale(face.scale * .8);
-    bumblebee = this.add.image(200, 100, 'bumblebee').setScale(face.scale * 0.5);
+    pestControl = this.add.image(100, 100, 'pest').setScale(face.scale * 1.5);
+    unicorn = this.add.image(1500, 800, 'unicorn').setScale(face.scale * 1.75);
+    bumblebee = this.add.image(200, 100, 'bumblebee').setScale(face.scale * 0.7);
 
     cursors = this.input.keyboard.createCursorKeys();
+    touchPointer = this.input.activePointer;
 
     moveSound = this.sound.add('move');
     collectSound = this.sound.add('collect');
@@ -73,10 +78,9 @@ function startGame() {
     gameStarted = true;
     backgroundMusic.play();
     
-    // Create the long snake body
     for (let i = 0; i < 25; i++) {
         let segment = snakeBody.create(800 - i * 30, 450, 'body').setScale(face.scale * 0.8);
-        segment.setDepth(0);  // Ensure all body segments are at depth 0 (below face)
+        segment.setDepth(0);
     }
 }
 
@@ -85,18 +89,33 @@ function update() {
 
     let velocityX = 0;
     let velocityY = 0;
+
+    // Keyboard controls
     if (cursors.left.isDown) {
         velocityX = -4;
-        if (!moveSound.isPlaying) moveSound.play();
     } else if (cursors.right.isDown) {
         velocityX = 4;
-        if (!moveSound.isPlaying) moveSound.play();
     }
     if (cursors.up.isDown) {
         velocityY = -4;
-        if (!moveSound.isPlaying) moveSound.play();
     } else if (cursors.down.isDown) {
         velocityY = 4;
+    }
+
+    // Touch controls
+    if (touchPointer.isDown) {
+        const touchX = touchPointer.x;
+        const touchY = touchPointer.y;
+        const gameWidth = this.sys.game.config.width;
+        const gameHeight = this.sys.game.config.height;
+
+        if (touchX < gameWidth / 3) velocityX = -4;
+        if (touchX > gameWidth * 2 / 3) velocityX = 4;
+        if (touchY < gameHeight / 3) velocityY = -4;
+        if (touchY > gameHeight * 2 / 3) velocityY = 4;
+    }
+
+    if (velocityX !== 0 || velocityY !== 0) {
         if (!moveSound.isPlaying) moveSound.play();
     }
 
