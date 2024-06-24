@@ -40,15 +40,16 @@ function preload() {
 }
 
 function create() {
-    this.add.image(960, 540, 'background').setScale(2.4);  // Adjusted for new dimensions
+    this.add.image(960, 540, 'background').setScale(2.4);
 
     snakeBody = this.add.group();
     
-    face = this.add.image(960, 540, 'face').setScale(0.2);
+    face = this.add.image(960, 540, 'face').setScale(0.5);
+    face.setDepth(1);  // Set face depth to 1 (above 0)
 
-    pestControl = this.add.image(100, 100, 'pest').setScale(0.15);
-    unicorn = this.add.image(1800, 900, 'unicorn').setScale(0.1);
-    bumblebee = this.add.image(200, 100, 'bumblebee').setScale(0.1);
+    pestControl = this.add.image(100, 100, 'pest').setScale(0.4);
+    unicorn = this.add.image(1800, 900, 'unicorn').setScale(0.2);
+    bumblebee = this.add.image(200, 100, 'bumblebee').setScale(0.7);
 
     cursors = this.input.keyboard.createCursorKeys();
 
@@ -66,13 +67,14 @@ function create() {
 }
 
 function startGame() {
-    startButton.setVisible(false);
+    startButton.setVisible(true);
     gameStarted = true;
     backgroundMusic.play();
     
     // Create the long snake body
-    for (let i = 0; i < 25; i++) {  // Increased from 5 to 25 segments
-        snakeBody.create(960 - i * 30, 540, 'body').setScale(0.5);
+    for (let i = 0; i < 25; i++) {
+        let segment = snakeBody.create(960 - i * 30, 540, 'body').setScale(1);
+        segment.setDepth(0);  // Ensure all body segments are at depth 0 (below face)
     }
 }
 
