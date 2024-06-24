@@ -21,7 +21,9 @@ let unicorn;
 let bumblebee;
 let cursors;
 let gameOver = false;
-let moveSound, collectSound, gameOverSound;
+let moveSound, collectSound, gameOverSound, backgroundMusic;
+let startButton;
+let gameStarted = false;
 
 function preload() {
     this.load.image('face', 'assets/your-face.png');
@@ -31,40 +33,52 @@ function preload() {
     this.load.image('unicorn', 'assets/unicorn.png');
     this.load.image('bumblebee', 'assets/bumblebee.png');
     
-    // Load audio files
     this.load.audio('move', 'assets/move.mp3');
     this.load.audio('collect', 'assets/collect.mp3');
     this.load.audio('gameover', 'assets/gameover.mp3');
+    this.load.audio('bgmusic', 'assets/background-music.mp3');
 }
 
 function create() {
-    this.add.image(400, 300, 'background');
+    this.add.image(960, 540, 'background').setScale(2.4);  // Adjusted for new dimensions
 
     snakeBody = this.add.group();
-    for (let i = 0; i < 5; i++) {
-        snakeBody.create(400 - i * 30, 300, 'body').setScale(0.5);
-    }
-
-    face = this.add.image(400, 300, 'face').setScale(0.2);
+    
+    face = this.add.image(960, 540, 'face').setScale(0.2);
 
     pestControl = this.add.image(100, 100, 'pest').setScale(0.15);
-    unicorn = this.add.image(700, 500, 'unicorn').setScale(0.1);
+    unicorn = this.add.image(1800, 900, 'unicorn').setScale(0.1);
     bumblebee = this.add.image(200, 100, 'bumblebee').setScale(0.1);
 
     cursors = this.input.keyboard.createCursorKeys();
 
-    // Initialize sounds
     moveSound = this.sound.add('move');
     collectSound = this.sound.add('collect');
     gameOverSound = this.sound.add('gameover');
+    backgroundMusic = this.sound.add('bgmusic', { loop: true, volume: 0.5 });
+
+    startButton = this.add.text(960, 540, 'Start Game', { fontSize: '64px', fill: '#fff' })
+        .setOrigin(0.5)
+        .setInteractive()
+        .on('pointerdown', startGame.bind(this));
 
     console.log('Game created');
 }
 
-function update() {
-    if (gameOver) return;
+function startGame() {
+    startButton.setVisible(false);
+    gameStarted = true;
+    backgroundMusic.play();
+    
+    // Create the long snake body
+    for (let i = 0; i < 25; i++) {  // Increased from 5 to 25 segments
+        snakeBody.create(960 - i * 30, 540, 'body').setScale(0.5);
+    }
+}
 
-    // Player movement
+function update() {
+    if (!gameStarted || gameOver) return;
+
     let velocityX = 0;
     let velocityY = 0;
     if (cursors.left.isDown) {
@@ -82,7 +96,6 @@ function update() {
         if (!moveSound.isPlaying) moveSound.play();
     }
 
-    // Update snake body
     let prevX = face.x;
     let prevY = face.y;
     face.x += velocityX;
@@ -96,20 +109,18 @@ function update() {
         prevY = tempY;
     });
 
-    // Keep the face within the game boundaries
     face.x = Phaser.Math.Clamp(face.x, face.width / 4, config.width - face.width / 4);
     face.y = Phaser.Math.Clamp(face.y, face.height / 4, config.height - face.height / 4);
 
-    // Move enemies towards the face
     moveEnemyTowards(pestControl, 2);
     moveEnemyTowards(unicorn, 1);
     moveEnemyTowards(bumblebee, 1.5);
 
-    // Check for collisions
     if (checkCollision(face, pestControl) || checkCollision(face, unicorn) || checkCollision(face, bumblebee)) {
         gameOver = true;
+        backgroundMusic.stop();
         gameOverSound.play();
-        this.add.text(400, 300, 'Game Over!', { fontSize: '64px', fill: '#fff' }).setOrigin(0.5);
+        this.add.text(960, 540, 'Game Over!', { fontSize: '64px', fill: '#fff' }).setOrigin(0.5);
         this.scene.pause();
     }
 }
