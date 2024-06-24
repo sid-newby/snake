@@ -15,7 +15,7 @@ let face;
 let cursors;
 
 function preload() {
-    this.load.image('face', 'assets/your-face.png');
+    this.load.image('face', 'assets/snakeking.png');
 }
 
 function create() {
