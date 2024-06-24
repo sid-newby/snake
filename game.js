@@ -45,13 +45,13 @@ function create() {
 
     snakeBody = this.add.group();
     
-    face = this.add.image(800, 450, 'face').setScale(0.5);
+    face = this.add.image(800, 450, 'face').setScale(1);
     face.setDepth(1);  // Set face depth to 1 (above 0)
 
     // Scale other elements relative to face
-    pestControl = this.add.image(100, 100, 'pest').setScale(face.scale * 1.5);
-    unicorn = this.add.image(1500, 800, 'unicorn').setScale(face.scale * 1.75);
-    bumblebee = this.add.image(200, 100, 'bumblebee').setScale(face.scale * 0.7);
+    pestControl = this.add.image(100, 100, 'pest').setScale(face.scale * 1);
+    unicorn = this.add.image(1500, 800, 'unicorn').setScale(face.scale * .8);
+    bumblebee = this.add.image(200, 100, 'bumblebee').setScale(face.scale * 0.5);
 
     cursors = this.input.keyboard.createCursorKeys();
 
