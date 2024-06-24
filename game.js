@@ -30,6 +30,7 @@ let moveSound, collectSound, gameOverSound, backgroundMusic;
 let startButton;
 let gameStarted = false;
 let touchPointer;
+let invulnerableTime = 0;
 
 function preload() {
     this.load.image('face', 'assets/your-face.png');
@@ -53,9 +54,10 @@ function create() {
     face = this.add.image(800, 450, 'face').setScale(0.5);
     face.setDepth(1);
 
-    pestControl = this.add.image(100, 100, 'pest').setScale(face.scale * 1.5);
-    unicorn = this.add.image(1500, 800, 'unicorn').setScale(face.scale * 1.75);
-    bumblebee = this.add.image(200, 100, 'bumblebee').setScale(face.scale * 0.7);
+    // Position enemies far from the initial snake position
+    pestControl = this.add.image(700, 700, 'pest').setScale(face.scale * 1);
+    unicorn = this.add.image(800, 800, 'unicorn').setScale(face.scale * .75);
+    bumblebee = this.add.image(400, 400, 'bumblebee').setScale(face.scale * 0.5);
 
     cursors = this.input.keyboard.createCursorKeys();
     touchPointer = this.input.activePointer;
@@ -82,10 +84,16 @@ function startGame() {
         let segment = snakeBody.create(800 - i * 30, 450, 'body').setScale(face.scale * 0.8);
         segment.setDepth(0);
     }
+    
+    // Set invulnerability for 2 seconds
+    invulnerableTime = 2000;
 }
 
-function update() {
+function update(time, delta) {
     if (!gameStarted || gameOver) return;
+
+    // Decrease invulnerability time
+    invulnerableTime = Math.max(0, invulnerableTime - delta);
 
     let velocityX = 0;
     let velocityY = 0;
@@ -139,11 +147,12 @@ function update() {
     moveEnemyTowards(unicorn, 1);
     moveEnemyTowards(bumblebee, 1.5);
 
-    if (checkCollision(face, pestControl) || checkCollision(face, unicorn) || checkCollision(face, bumblebee)) {
+    // Only check for collisions if not invulnerable
+    if (invulnerableTime === 0 && (checkCollision(face, pestControl) || checkCollision(face, unicorn) || checkCollision(face, bumblebee))) {
         gameOver = true;
         backgroundMusic.stop();
         gameOverSound.play();
-        this.add.text(800, 450, 'Game Over!', { fontSize: '200px', fill: '#fff' }).setOrigin(0.5);
+        this.add.text(800, 450, 'Game Over!', { fontSize: '64px', fill: '#fff' }).setOrigin(0.5);
         this.scene.pause();
     }
 }
@@ -155,5 +164,5 @@ function moveEnemyTowards(enemy, speed) {
 }
 
 function checkCollision(object1, object2) {
-    return Phaser.Geom.Intersects.RectangleToRectangle(object1.getBounds(), object2.getBounds());
+    return Phaser.Math.Distance.Between(object1.x, object1.y, object2.x, object2.y) < object1.width / 2 + object2.width / 2;
 }
