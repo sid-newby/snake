@@ -54,7 +54,6 @@ function create() {
     face = this.add.image(800, 450, 'face').setScale(0.5);
     face.setDepth(1);
 
-    // Position enemies far from the initial snake position
     pestControl = this.add.image(100, 100, 'pest').setScale(face.scale * 1.5);
     unicorn = this.add.image(1500, 800, 'unicorn').setScale(face.scale * 1.75);
     bumblebee = this.add.image(200, 100, 'bumblebee').setScale(face.scale * 0.7);
@@ -80,10 +79,20 @@ function startGame() {
     gameStarted = true;
     backgroundMusic.play();
     
-    for (let i = 0; i < 25; i++) {
-        let segment = snakeBody.create(800 - i * 30, 450, 'body').setScale(face.scale * 0.8);
-        segment.setDepth(0);
+    // Create snake body only if it doesn't exist
+    if (snakeBody.getChildren().length === 0) {
+        for (let i = 0; i < 25; i++) {
+            let segment = snakeBody.create(800 - i * 30, 450, 'body').setScale(face.scale * 0.8);
+            segment.setDepth(0);
+        }
     }
+    
+    // Ensure all game elements are visible
+    face.setVisible(true);
+    pestControl.setVisible(true);
+    unicorn.setVisible(true);
+    bumblebee.setVisible(true);
+    snakeBody.getChildren().forEach(segment => segment.setVisible(true));
     
     // Set invulnerability for 2 seconds
     invulnerableTime = 2000;
@@ -92,35 +101,20 @@ function startGame() {
 function update(time, delta) {
     if (!gameStarted || gameOver) return;
 
-    // Decrease invulnerability time
     invulnerableTime = Math.max(0, invulnerableTime - delta);
 
     let velocityX = 0;
     let velocityY = 0;
 
-    // Keyboard controls
-    if (cursors.left.isDown) {
+    if (cursors.left.isDown || (touchPointer.isDown && touchPointer.x < config.width / 3)) {
         velocityX = -4;
-    } else if (cursors.right.isDown) {
+    } else if (cursors.right.isDown || (touchPointer.isDown && touchPointer.x > config.width * 2 / 3)) {
         velocityX = 4;
     }
-    if (cursors.up.isDown) {
+    if (cursors.up.isDown || (touchPointer.isDown && touchPointer.y < config.height / 3)) {
         velocityY = -4;
-    } else if (cursors.down.isDown) {
+    } else if (cursors.down.isDown || (touchPointer.isDown && touchPointer.y > config.height * 2 / 3)) {
         velocityY = 4;
-    }
-
-    // Touch controls
-    if (touchPointer.isDown) {
-        const touchX = touchPointer.x;
-        const touchY = touchPointer.y;
-        const gameWidth = this.sys.game.config.width;
-        const gameHeight = this.sys.game.config.height;
-
-        if (touchX < gameWidth / 3) velocityX = -4;
-        if (touchX > gameWidth * 2 / 3) velocityX = 4;
-        if (touchY < gameHeight / 3) velocityY = -4;
-        if (touchY > gameHeight * 2 / 3) velocityY = 4;
     }
 
     if (velocityX !== 0 || velocityY !== 0) {
@@ -131,7 +125,7 @@ function update(time, delta) {
     let prevY = face.y;
     face.x += velocityX;
     face.y += velocityY;
-    snakeBody.children.entries.forEach((segment) => {
+    snakeBody.getChildren().forEach((segment) => {
         let tempX = segment.x;
         let tempY = segment.y;
         segment.x = prevX;
@@ -147,7 +141,6 @@ function update(time, delta) {
     moveEnemyTowards(unicorn, 1);
     moveEnemyTowards(bumblebee, 1.5);
 
-    // Only check for collisions if not invulnerable
     if (invulnerableTime === 0 && (checkCollision(face, pestControl) || checkCollision(face, unicorn) || checkCollision(face, bumblebee))) {
         gameOver = true;
         backgroundMusic.stop();
