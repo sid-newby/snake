@@ -7,6 +7,12 @@ const config = {
       width: 1600,
       height: 900
     },
+    physics: {
+      default: 'arcade',
+      arcade: {
+        debug: false
+      }
+    },
     scene: {
       preload: preload,
       create: create,
@@ -20,7 +26,6 @@ const config = {
   const game = new Phaser.Game(config)
   
   let face
-  let snakeBody
   let pestControl
   let unicorn
   let bumblebee
@@ -49,19 +54,13 @@ const config = {
   function create() {
     this.add.image(800, 450, 'background').setDisplaySize(1600, 900)
   
-    snakeBody = this.add.group()
-  
-    face = this.add.image(800, 450, 'face').setScale(0.5)
+    // Enable physics for the main character and enemies
+    face = this.physics.add.image(800, 450, 'face').setScale(0.5)
     face.setDepth(1)
   
-    pestControl = this.add.image(100, 100, 'pest').setScale(face.scale * 1.5)
-    unicorn = this.add.image(1500, 800, 'unicorn').setScale(face.scale * 1.75)
-    bumblebee = this.add.image(200, 100, 'bumblebee').setScale(face.scale * 0.7)
-  
-    // Set custom hitboxes
-    pestControl.setInteractive({ hitArea: new Phaser.Geom.Circle(pestControl.width / 2, pestControl.height / 2, pestControl.width / 4), hitAreaCallback: Phaser.Geom.Circle.Contains })
-    unicorn.setInteractive({ hitArea: new Phaser.Geom.Circle(unicorn.width / 2, unicorn.height / 2, unicorn.width / 4), hitAreaCallback: Phaser.Geom.Circle.Contains })
-    bumblebee.setInteractive({ hitArea: new Phaser.Geom.Circle(bumblebee.width / 2, bumblebee.height / 2, bumblebee.width / 4), hitAreaCallback: Phaser.Geom.Circle.Contains })
+    pestControl = this.physics.add.image(100, 100, 'pest').setScale(face.scale * 1.5)
+    unicorn = this.physics.add.image(1500, 800, 'unicorn').setScale(face.scale * 1.75)
+    bumblebee = this.physics.add.image(200, 100, 'bumblebee').setScale(face.scale * 0.7)
   
     cursors = this.input.keyboard.createCursorKeys()
     touchPointer = this.input.activePointer
@@ -84,20 +83,11 @@ const config = {
     gameStarted = true
     backgroundMusic.play()
   
-    // Create snake body only if it doesn't exist
-    if (snakeBody.getChildren().length === 0) {
-      for (let i = 0; i < 100; i++) {
-        let segment = snakeBody.create(800 - i * 30, 450, 'body').setScale(face.scale * 0.8)
-        segment.setDepth(0)
-      }
-    }
-  
     // Ensure all game elements are visible
     face.setVisible(true)
     pestControl.setVisible(true)
     unicorn.setVisible(true)
     bumblebee.setVisible(true)
-    snakeBody.getChildren().forEach(segment => segment.setVisible(true))
   
     // Set invulnerability for 2 seconds
     invulnerableTime = 2000
@@ -126,45 +116,28 @@ const config = {
       if (!moveSound.isPlaying) moveSound.play()
     }
   
-    let prevX = face.x
-    let prevY = face.y
-    face.x += velocityX
-    face.y += velocityY
-    snakeBody.getChildren().forEach((segment) => {
-      let tempX = segment.x
-      let tempY = segment.y
-      segment.x = prevX
-      segment.y = prevY
-      prevX = tempX
-      prevY = tempY
-    })
-  
-    face.x = Phaser.Math.Clamp(face.x, face.width / 4, config.width - face.width / 4)
-    face.y = Phaser.Math.Clamp(face.y, face.height / 4, config.height - face.height / 4)
+    face.setVelocity(velocityX * 50, velocityY * 50)
   
     moveEnemyTowards(pestControl, 2)
     moveEnemyTowards(unicorn, 1)
     moveEnemyTowards(bumblebee, 1.5)
   
-    if (invulnerableTime === 0 && (checkCollision(face, pestControl) || checkCollision(face, unicorn) || checkCollision(face, bumblebee))) {
-      gameOver = true
-      backgroundMusic.stop()
-      gameOverSound.play()
-      this.add.text(800, 450, 'Game Over!', { fontSize: '64px', fill: '#fff' }).setOrigin(0.5)
-      this.scene.pause()
-    }
+    // Use Arcade Physics to check for overlaps
+    this.physics.world.collide(face, [pestControl, unicorn, bumblebee], handleCollision, null, this)
   }
   
   function moveEnemyTowards(enemy, speed) {
     let angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, face.x, face.y)
-    enemy.x += Math.cos(angle) * speed
-    enemy.y += Math.sin(angle) * speed
+    this.physics.moveTo(enemy, face.x, face.y, speed * 50)
   }
   
-  function checkCollision(object1, object2) {
-    return Phaser.Geom.Intersects.CircleToCircle(
-      new Phaser.Geom.Circle(object1.x, object1.y, object1.displayWidth / 4), 
-      new Phaser.Geom.Circle(object2.x, object2.y, object2.displayWidth / 4)
-    )
+  function handleCollision() {
+    if (invulnerableTime === 0) {
+      gameOver = true
+      backgroundMusic.stop()
+      gameOverSound.play()
+      this.add.text(800, 450, 'Game Over, Dumbfuck!', { fontSize: '64px', fill: '#fff' }).setOrigin(0.5)
+      this.scene.pause()
+    }
   }
   
