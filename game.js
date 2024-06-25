@@ -104,31 +104,31 @@ const config = {
   function revealGameBoard() {
     // Fade out the cover and start text
     this.tweens.add({
-      targets: [coverScreen, startText],
-      alpha: 0,
-      duration: 1000,
-      onComplete: () => {
-        coverScreen.destroy()
-        startText.destroy()
-        startGame.call(this)
-      }
-    })
-  }
-  
-  function startGame() {
-    startButton.setVisible(false)
-    gameStarted = true
-    backgroundMusic.play()
-  
+        targets: [coverScreen, startText],
+        alpha: 0,
+        duration: 1000,
+        onComplete: () => {
+            coverScreen.destroy();
+            startText.destroy();
+            this.startGame(); // Start the game after the cover screen is removed
+        }
+    });
+}
+
+function startGame() {
+    // Removed startButton.setVisible(false) as startButton is not defined or used
+    gameStarted = true;
+    backgroundMusic.play();
+
     // Ensure all game elements are visible
-    face.setVisible(true)
-    pestControl.setVisible(true)
-    unicorn.setVisible(true)
-    bumblebee.setVisible(true)
-  
+    face.setVisible(true);
+    pestControl.setVisible(true);
+    unicorn.setVisible(true);
+    bumblebee.setVisible(true);
+
     // Set invulnerability for 2 seconds
-    invulnerableTime = 2000
-  }
+    invulnerableTime = 2000;
+}
   
   function update(time, delta) {
     if (!gameStarted || gameOver) return
