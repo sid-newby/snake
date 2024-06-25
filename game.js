@@ -115,43 +115,50 @@ function startGame() {
 }
 
 function update() {
-  if (!gameStarted || gameOver) return;
-
-  let velocityX = 0;
-  let velocityY = 0;
-
-  if (cursors.left.isDown || (touchPointer.isDown && touchPointer.x < config.scale.width / 3)) {
-    velocityX = -4;
-  } else if (cursors.right.isDown || (touchPointer.isDown && touchPointer.x > config.scale.width * 2 / 3)) {
-    velocityX = 4;
+    if (!gameStarted || gameOver) return;
+  
+    let velocityX = 0;
+    let velocityY = 0;
+  
+    if (cursors.left.isDown || (touchPointer.isDown && touchPointer.x < config.scale.width / 3)) {
+      velocityX = -4;
+    } else if (cursors.right.isDown || (touchPointer.isDown && touchPointer.x > config.scale.width * 2 / 3)) {
+      velocityX = 4;
+    }
+    if (cursors.up.isDown || (touchPointer.isDown && touchPointer.y < config.scale.height / 3)) {
+      velocityY = -4;
+    } else if (cursors.down.isDown || (touchPointer.isDown && touchPointer.y > config.scale.height * 2 / 3)) {
+      velocityY = 4;
+    }
+  
+    if (velocityX !== 0 || velocityY !== 0) {
+      if (!moveSound.isPlaying) moveSound.play();
+    }
+  
+    face.setVelocity(velocityX * 50, velocityY * 50);
+  
+    this.moveEnemyTowards(pestControl, 2);
+    this.moveEnemyTowards(unicorn, 1);
+    this.moveEnemyTowards(bumblebee, 1.5);
+  
+    this.physics.world.collide(face, [pestControl, unicorn, bumblebee], handleCollision, checkCollisionDistance, this);
   }
-  if (cursors.up.isDown || (touchPointer.isDown && touchPointer.y < config.scale.height / 3)) {
-    velocityY = -4;
-  } else if (cursors.down.isDown || (touchPointer.isDown && touchPointer.y > config.scale.height * 2 / 3)) {
-    velocityY = 4;
+  
+  function checkCollisionDistance(player, enemy) {
+    // Define a maximum distance for collision (adjust as needed)
+    const maxCollisionDistance = 50; // pixels
+  
+    // Calculate the distance between the player and the enemy
+    const distance = Phaser.Math.Distance.Between(player.x, player.y, enemy.x, enemy.y);
+  
+    // Only allow collision if the distance is less than maxCollisionDistance
+    return distance < maxCollisionDistance;
   }
-
-  if (velocityX !== 0 || velocityY !== 0) {
-    if (!moveSound.isPlaying) moveSound.play();
+  
+  function handleCollision() {
+    gameOver = true;
+    backgroundMusic.stop();
+    gameOverSound.play();
+    this.add.text(800, 450, 'Game Over!', { fontSize: '64px', fill: '#fff' }).setOrigin(0.5);
+    this.scene.pause();
   }
-
-  face.setVelocity(velocityX * 50, velocityY * 50);
-
-  this.moveEnemyTowards(pestControl, 2);
-  this.moveEnemyTowards(unicorn, 1);
-  this.moveEnemyTowards(bumblebee, 1.5);
-
-  this.physics.world.collide(face, [pestControl, unicorn, bumblebee], handleCollision, null, this);
-}
-
-function moveEnemyTowards(enemy, speed) {
-  this.physics.moveTo(enemy, face.x, face.y, speed * 50);
-}
-
-function handleCollision() {
-  gameOver = true;
-  backgroundMusic.stop();
-  gameOverSound.play();
-  this.add.text(800, 450, 'Game Over!', { fontSize: '64px', fill: '#fff' }).setOrigin(0.5);
-  this.scene.pause();
-}
