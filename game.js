@@ -11,7 +11,7 @@ const config = {
       default: 'arcade',
       arcade: {
         debug: false
-      }
+      // Remove the extra closing brace
     },
     scene: {
       preload: preload,
@@ -125,15 +125,11 @@ function startGame() {
     pestControl.setVisible(true);
     unicorn.setVisible(true);
     bumblebee.setVisible(true);
-
-    // Set invulnerability for 2 seconds
-    invulnerableTime = 2000;
+    
 }
   
   function update(time, delta) {
     if (!gameStarted || gameOver) return
-  
-    invulnerableTime = Math.max(0, invulnerableTime - delta)
   
     let velocityX = 0
     let velocityY = 0
@@ -169,7 +165,6 @@ function startGame() {
   }
   
   function handleCollision() {
-    if (invulnerableTime === 0) {
       gameOver = true
       backgroundMusic.stop()
       gameOverSound.play()
