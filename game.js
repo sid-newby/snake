@@ -81,10 +81,10 @@ const config = {
     coverScreen.setDepth(10)
   
     // Create start text
-    startText = this.add.text(800, 450, 'Click to Start', { 
+    startText = this.add.text(400, 225, 'you cant read.', { 
       fontSize: '64px', 
       fill: '#ffffff',
-      stroke: '#000000',
+      stroke: '#0bb6dd',
       strokeThickness: 6
     })
     startText.setOrigin(0.5)
