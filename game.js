@@ -1,24 +1,3 @@
-const config = {
-    type: Phaser.AUTO,
-    scale: {
-      mode: Phaser.Scale.FIT,
-      parent: 'phaser-example',
-      autoCenter: Phaser.Scale.CENTER_BOTH,
-      width: 1600,
-      height: 900
-    },
-    physics: {
-      default: 'arcade',
-      arcade: {
-        debug: false
-      }
-    },
-    scene: MyScene,
-    audio: {
-      disableWebAudio: true
-    }
-};
-
 class MyScene extends Phaser.Scene {
     constructor() {
         super('MyScene');
@@ -86,14 +65,14 @@ class MyScene extends Phaser.Scene {
         let velocityX = 0;
         let velocityY = 0;
 
-        if (this.cursors.left.isDown || (this.touchPointer.isDown && this.touchPointer.x < config.scale.width / 3)) {
+        if (this.cursors.left.isDown || (this.touchPointer.isDown && this.touchPointer.x < this.scale.width / 3)) {
             velocityX = -4;
-        } else if (this.cursors.right.isDown || (this.touchPointer.isDown && this.touchPointer.x > config.scale.width * 2 / 3)) {
+        } else if (this.cursors.right.isDown || (this.touchPointer.isDown && this.touchPointer.x > this.scale.width * 2 / 3)) {
             velocityX = 4;
         }
-        if (this.cursors.up.isDown || (this.touchPointer.isDown && this.touchPointer.y < config.scale.height / 3)) {
+        if (this.cursors.up.isDown || (this.touchPointer.isDown && this.touchPointer.y < this.scale.height / 3)) {
             velocityY = -4;
-        } else if (this.cursors.down.isDown || (this.touchPointer.isDown && this.touchPointer.y > config.scale.height * 2 / 3)) {
+        } else if (this.cursors.down.isDown || (this.touchPointer.isDown && this.touchPointer.y > this.scale.height * 2 / 3)) {
             velocityY = 4;
         }
 
@@ -149,5 +128,26 @@ class MyScene extends Phaser.Scene {
         this.scene.pause();
     }
 }
+
+const config = {
+    type: Phaser.AUTO,
+    scale: {
+      mode: Phaser.Scale.FIT,
+      parent: 'phaser-example',
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+      width: 1600,
+      height: 900
+    },
+    physics: {
+      default: 'arcade',
+      arcade: {
+        debug: false
+      }
+    },
+    scene: MyScene,
+    audio: {
+      disableWebAudio: true
+    }
+};
 
 const game = new Phaser.Game(config);
