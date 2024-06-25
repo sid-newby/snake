@@ -111,7 +111,7 @@ function update() {
     this.physics.world.collide(this.face, [this.pestControl, this.unicorn, this.bumblebee], this.handleCollision, this.checkCollisionDistance, this);
 }
 
-function revealGameBoard() {
+revealGameBoard() {
     this.tweens.add({
         targets: [this.coverScreen, this.startText],
         alpha: 0,
@@ -124,7 +124,7 @@ function revealGameBoard() {
     });
 }
 
-function startGame() {
+startGame() {
     this.gameStarted = true;
     this.backgroundMusic.play();
 
@@ -132,9 +132,63 @@ function startGame() {
     [this.face, this.pestControl, this.unicorn, this.bumblebee].forEach(obj => obj.setVisible(true));
 }
 
-function moveEnemyTowards(enemy, speed) {
+class MyScene extends Phaser.Scene {
+    constructor() {
+        super('MyScene');
+    }
+
+    preload() {
+        // Your preload code
+    }
+
+    create() {
+        // Your create code (the function you shared)
+    }
+
+    revealGameBoard() {
+        // The revealGameBoard function from step 1
+    }
+
+    startGame() {
+        // The startGame function from step 2
+    }
+
+    update() {
+        // Your update code
+    }
+}
+
+moveEnemyTowards(enemy, speed) {
     this.physics.moveTo(enemy, this.face.x, this.face.y, speed * 50);
 }
+
+const MyScene = new Phaser.Class({
+    Extends: Phaser.Scene,
+
+    initialize: function MyScene() {
+        Phaser.Scene.call(this, { key: 'MyScene' });
+    },
+
+    preload: function() {
+        // Your preload code
+    },
+
+    create: function() {
+        // Your create code (the function you shared)
+    },
+
+    revealGameBoard: function() {
+        // The revealGameBoard function from step 1
+    },
+
+    startGame: function() {
+        // The startGame function from step 2
+    },
+
+    update: function() {
+        // Your update code
+    }
+});
 
 function checkCollisionDistance(player, enemy) {
     const maxCollisionDistance = 50; // pixels
