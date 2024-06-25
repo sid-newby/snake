@@ -44,6 +44,8 @@ const config = {
     this.load.image('background', 'assets/background.png')
     this.load.image('unicorn', 'assets/unicorn.png')
     this.load.image('bumblebee', 'assets/bumblebee.png')
+    // Load the new cover image
+    this.load.image('cover', 'assets/cover.png')
   
     this.load.audio('move', 'assets/move.mp3')
     this.load.audio('collect', 'assets/collect.mp3')
@@ -51,16 +53,19 @@ const config = {
     this.load.audio('bgmusic', 'assets/background-music.mp3')
   }
   
+  let coverScreen;
+  let startText;
+  
   function create() {
     this.add.image(800, 450, 'background').setDisplaySize(1600, 900)
   
-    // Enable physics for the main character and enemies
-    face = this.physics.add.image(800, 450, 'face').setScale(0.5)
+    // Enable physics for the main character and enemies, but hide them initially
+    face = this.physics.add.image(800, 450, 'face').setScale(0.5).setVisible(false)
     face.setDepth(1)
   
-    pestControl = this.physics.add.image(100, 100, 'pest').setScale(face.scale * 1.5)
-    unicorn = this.physics.add.image(1500, 800, 'unicorn').setScale(face.scale * 1.75)
-    bumblebee = this.physics.add.image(200, 100, 'bumblebee').setScale(face.scale * 0.7)
+    pestControl = this.physics.add.image(100, 100, 'pest').setScale(face.scale * 1.5).setVisible(false)
+    unicorn = this.physics.add.image(1500, 800, 'unicorn').setScale(face.scale * 1.75).setVisible(false)
+    bumblebee = this.physics.add.image(200, 100, 'bumblebee').setScale(face.scale * 0.7).setVisible(false)
   
     cursors = this.input.keyboard.createCursorKeys()
     touchPointer = this.input.activePointer
@@ -70,12 +75,44 @@ const config = {
     gameOverSound = this.sound.add('gameover')
     backgroundMusic = this.sound.add('bgmusic', { loop: true, volume: 0.5 })
   
-    startButton = this.add.text(800, 450, 'Start Game', { fontSize: '64px', fill: '#fff' })
-      .setOrigin(0.5)
-      .setInteractive()
-      .on('pointerdown', startGame.bind(this))
+    // Create cover screen using the custom image
+    coverScreen = this.add.image(800, 450, 'cover')
+    coverScreen.setDisplaySize(1600, 900)  // Adjust size to match your game dimensions
+    coverScreen.setDepth(10)
+  
+    // Create start text
+    startText = this.add.text(800, 450, 'Click to Start', { 
+      fontSize: '64px', 
+      fill: '#ffffff',
+      stroke: '#000000',
+      strokeThickness: 6
+    })
+    startText.setOrigin(0.5)
+    startText.setDepth(11)
+  
+    // Make the cover screen interactive
+    coverScreen.setInteractive()
+    coverScreen.on('pointerdown', revealGameBoard, this)
+  
+    // Bind moveEnemyTowards and handleCollision to the scene
+    this.moveEnemyTowards = moveEnemyTowards.bind(this)
+    this.handleCollision = handleCollision.bind(this)
   
     console.log('Game created')
+  }
+  
+  function revealGameBoard() {
+    // Fade out the cover and start text
+    this.tweens.add({
+      targets: [coverScreen, startText],
+      alpha: 0,
+      duration: 1000,
+      onComplete: () => {
+        coverScreen.destroy()
+        startText.destroy()
+        startGame.call(this)
+      }
+    })
   }
   
   function startGame() {
@@ -140,4 +177,3 @@ const config = {
       this.scene.pause()
     }
   }
-  
