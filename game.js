@@ -55,12 +55,15 @@ function preload() {
 function create() {
   this.add.image(800, 450, 'background').setDisplaySize(1600, 900);
 
-  face = this.physics.add.image(800, 450, 'face').setScale(0.5).setVisible(false);
+  face = this.physics.add.image(800, 450, 'face').setScale(0.5);
   face.setDepth(1);
 
-  pestControl = this.physics.add.image(100, 100, 'pest').setScale(face.scale * 1.5).setVisible(false);
-  unicorn = this.physics.add.image(1500, 800, 'unicorn').setScale(face.scale * 1.75).setVisible(false);
-  bumblebee = this.physics.add.image(200, 100, 'bumblebee').setScale(face.scale * 0.7).setVisible(false);
+  pestControl = this.physics.add.image(100, 100, 'pest').setScale(face.scale * 1.5);
+  unicorn = this.physics.add.image(1500, 800, 'unicorn').setScale(face.scale * 1.75);
+  bumblebee = this.physics.add.image(200, 100, 'bumblebee').setScale(face.scale * 0.7);
+
+  // Hide game objects initially
+  [face, pestControl, unicorn, bumblebee].forEach(obj => obj.setVisible(false));
 
   cursors = this.input.keyboard.createCursorKeys();
   touchPointer = this.input.activePointer;
@@ -86,8 +89,8 @@ function create() {
   coverScreen.setInteractive();
   coverScreen.on('pointerdown', revealGameBoard, this);
 
-  this.moveEnemyTowards = moveEnemyTowards.bind(this);
-  this.handleCollision = handleCollision.bind(this);
+  // Bind moveEnemyTowards to the scene
+  this.moveEnemyTowards = moveEnemyTowards;
 }
 
 function revealGameBoard() {
@@ -107,10 +110,8 @@ function startGame() {
   gameStarted = true;
   backgroundMusic.play();
 
-  face.setVisible(true);
-  pestControl.setVisible(true);
-  unicorn.setVisible(true);
-  bumblebee.setVisible(true);
+  // Make game objects visible
+  [face, pestControl, unicorn, bumblebee].forEach(obj => obj.setVisible(true));
 }
 
 function update() {
@@ -140,7 +141,7 @@ function update() {
   this.moveEnemyTowards(unicorn, 1);
   this.moveEnemyTowards(bumblebee, 1.5);
 
-  this.physics.world.collide(face, [pestControl, unicorn, bumblebee], this.handleCollision, null, this);
+  this.physics.world.collide(face, [pestControl, unicorn, bumblebee], handleCollision, null, this);
 }
 
 function moveEnemyTowards(enemy, speed) {
