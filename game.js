@@ -86,32 +86,16 @@ class MyScene extends Phaser.Scene {
         this.moveEnemyTowards(this.unicorn, 1);
         this.moveEnemyTowards(this.bumblebee, 1.5);
 
-        this.physics.world.collide(this.face, [this.pestControl, this.unicorn, this.bumblebee], this.handleCollision, this.checkCollisionDistance, this);
-    }
-
-    revealGameBoard() {
-        this.tweens.add({
-            targets: [this.coverScreen, this.startText],
-            alpha: 0,
-            duration: 1000,
-            onComplete: () => {
-                this.coverScreen.destroy();
-                this.startText.destroy();
-                this.startGame();
-            }
-        });
-    }
-
-    startGame() {
-        this.gameStarted = true;
-        this.backgroundMusic.play();
-
-        // Make game objects visible
-        [this.face, this.pestControl, this.unicorn, this.bumblebee].forEach(obj => obj.setVisible(true));
+        // Use overlap instead of collide
+        this.physics.overlapCirc(this.face.x, this.face.y, 30, false, false, [this.pestControl, this.unicorn, this.bumblebee], this.handleCollision, this);
     }
 
     moveEnemyTowards(enemy, speed) {
-        this.physics.moveTo(enemy, this.face.x, this.face.y, speed * 50);
+        const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, this.face.x, this.face.y);
+        enemy.setVelocity(
+            Math.cos(angle) * speed * 50,
+            Math.sin(angle) * speed * 50
+        );
     }
 
     checkCollisionDistance(player, enemy) {
@@ -120,14 +104,15 @@ class MyScene extends Phaser.Scene {
         return distance < maxCollisionDistance;
     }
 
-    handleCollision() {
-        this.gameOver = true;
-        this.backgroundMusic.stop();
-        this.gameOverSound.play();
-        this.add.text(800, 450, 'Game Over!', { fontSize: '64px', fill: '#fff' }).setOrigin(0.5);
-        this.scene.pause();
+    handleCollision(player, enemy) {
+        if (this.checkCollisionDistance(player, enemy)) {
+            this.gameOver = true;
+            this.backgroundMusic.stop();
+            this.gameOverSound.play();
+            this.add.text(800, 450, 'Game Over!', { fontSize: '64px', fill: '#fff' }).setOrigin(0.5);
+            this.scene.pause();
+        }
     }
-}
 
 const config = {
     type: Phaser.AUTO,
