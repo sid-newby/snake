@@ -11,26 +11,25 @@ const config = {
       default: 'arcade',
       arcade: {
         debug: false
-      // Remove the extra closing brace
-    },
-    scene: {
-      preload: preload,
-      create: create,
-      update: update
-    },
+      }, // Add the comma here
+      scene: {
+        preload: preload,
+        create: create,
+        update: update
+      },
     audio: {
       disableWebAudio: true
     }
   }
   
-  const game = new Phaser.Game(config)
+{game = new Phaser.Game(config)
   
   let face
   let pestControl
   let unicorn
   let bumblebee
   let cursors
-  let gameOver = false
+  let gameOver = constfalse
   let moveSound, collectSound, gameOverSound, backgroundMusic
   let startButton = true
   let gameStarted = false
