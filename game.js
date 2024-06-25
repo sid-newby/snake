@@ -23,7 +23,7 @@ const config = {
     }
 };
 
-const game = new Phaser.Game(config); // Add this line to create the game instance
+const game = new Phaser.Game(config);
 
 let face;
 let pestControl;
@@ -34,7 +34,6 @@ let gameOver = false;
 let moveSound, collectSound, gameOverSound, backgroundMusic;
 let gameStarted = false;
 let touchPointer;
-let invulnerableTime = 0;
 let coverScreen;
 let startText;
 
@@ -86,6 +85,9 @@ function create() {
 
   coverScreen.setInteractive();
   coverScreen.on('pointerdown', revealGameBoard, this);
+
+  this.moveEnemyTowards = moveEnemyTowards.bind(this);
+  this.handleCollision = handleCollision.bind(this);
 }
 
 function revealGameBoard() {
@@ -96,7 +98,7 @@ function revealGameBoard() {
       onComplete: () => {
           coverScreen.destroy();
           startText.destroy();
-          startGame.call(this); // Use .call(this) to ensure correct context
+          startGame.call(this);
       }
   });
 }
@@ -109,15 +111,10 @@ function startGame() {
   pestControl.setVisible(true);
   unicorn.setVisible(true);
   bumblebee.setVisible(true);
-
-  // Set invulnerability for 2 seconds
-  invulnerableTime = 2000;
 }
 
-function update(time, delta) {
+function update() {
   if (!gameStarted || gameOver) return;
-
-  invulnerableTime = Math.max(0, invulnerableTime - delta);
 
   let velocityX = 0;
   let velocityY = 0;
@@ -147,16 +144,13 @@ function update(time, delta) {
 }
 
 function moveEnemyTowards(enemy, speed) {
-  let angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, face.x, face.y);
   this.physics.moveTo(enemy, face.x, face.y, speed * 50);
 }
 
 function handleCollision() {
-  if (invulnerableTime === 0) {
-    gameOver = true;
-    backgroundMusic.stop();
-    gameOverSound.play();
-    this.add.text(800, 450, 'Game Over!', { fontSize: '64px', fill: '#fff' }).setOrigin(0.5);
-    this.scene.pause();
-  }
+  gameOver = true;
+  backgroundMusic.stop();
+  gameOverSound.play();
+  this.add.text(800, 450, 'Game Over!', { fontSize: '64px', fill: '#fff' }).setOrigin(0.5);
+  this.scene.pause();
 }
