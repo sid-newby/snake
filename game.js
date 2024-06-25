@@ -23,6 +23,8 @@ const config = {
     }
 };
 
+const game = new Phaser.Game(config); // Add this line to create the game instance
+
 let face;
 let pestControl;
 let unicorn;
@@ -33,6 +35,8 @@ let moveSound, collectSound, gameOverSound, backgroundMusic;
 let gameStarted = false;
 let touchPointer;
 let invulnerableTime = 0;
+let coverScreen;
+let startText;
 
 function preload() {
   this.load.image('face', 'assets/your-face.png');
@@ -41,7 +45,6 @@ function preload() {
   this.load.image('background', 'assets/background.png');
   this.load.image('unicorn', 'assets/unicorn.png');
   this.load.image('bumblebee', 'assets/bumblebee.png');
-  // Load the new cover image
   this.load.image('cover', 'assets/cover.png');
 
   this.load.audio('move', 'assets/move.mp3');
@@ -50,13 +53,9 @@ function preload() {
   this.load.audio('bgmusic', 'assets/background-music.mp3');
 }
 
-let coverScreen;
-let startText;
-
 function create() {
   this.add.image(800, 450, 'background').setDisplaySize(1600, 900);
 
-  // Enable physics for the main character and enemies, but hide them initially
   face = this.physics.add.image(800, 450, 'face').setScale(0.5).setVisible(false);
   face.setDepth(1);
 
@@ -72,12 +71,10 @@ function create() {
   gameOverSound = this.sound.add('gameover');
   backgroundMusic = this.sound.add('bgmusic', { loop: true, volume: 0.5 });
 
-  // Create cover screen using the custom image
   coverScreen = this.add.image(800, 450, 'cover');
-  coverScreen.setDisplaySize(1600, 900);  // Adjust size to match your game dimensions
+  coverScreen.setDisplaySize(1600, 900);
   coverScreen.setDepth(10);
 
-  // Create start text
   startText = this.add.text(400, 225, 'you cant read.', { 
     fontSize: '64px', 
     fill: '#ffffff',
@@ -87,19 +84,11 @@ function create() {
   startText.setOrigin(0.5);
   startText.setDepth(11);
 
-  // Make the cover screen interactive
   coverScreen.setInteractive();
   coverScreen.on('pointerdown', revealGameBoard, this);
-
-  // Bind moveEnemyTowards and handleCollision to the scene
-  this.moveEnemyTowards = moveEnemyTowards.bind(this);
-  this.handleCollision = handleCollision.bind(this);
-
-  console.log('Game created');
 }
 
 function revealGameBoard() {
-  // Fade out the cover and start text
   this.tweens.add({
       targets: [coverScreen, startText],
       alpha: 0,
@@ -107,7 +96,7 @@ function revealGameBoard() {
       onComplete: () => {
           coverScreen.destroy();
           startText.destroy();
-          this.startGame(); // Start the game after the cover screen is removed
+          startGame.call(this); // Use .call(this) to ensure correct context
       }
   });
 }
@@ -116,27 +105,31 @@ function startGame() {
   gameStarted = true;
   backgroundMusic.play();
 
-  // Ensure all game elements are visible
   face.setVisible(true);
   pestControl.setVisible(true);
   unicorn.setVisible(true);
   bumblebee.setVisible(true);
+
+  // Set invulnerability for 2 seconds
+  invulnerableTime = 2000;
 }
 
 function update(time, delta) {
   if (!gameStarted || gameOver) return;
 
+  invulnerableTime = Math.max(0, invulnerableTime - delta);
+
   let velocityX = 0;
   let velocityY = 0;
 
-  if (cursors.left.isDown || (touchPointer.isDown && touchPointer.x < config.width / 3)) {
+  if (cursors.left.isDown || (touchPointer.isDown && touchPointer.x < config.scale.width / 3)) {
     velocityX = -4;
-  } else if (cursors.right.isDown || (touchPointer.isDown && touchPointer.x > config.width * 2 / 3)) {
+  } else if (cursors.right.isDown || (touchPointer.isDown && touchPointer.x > config.scale.width * 2 / 3)) {
     velocityX = 4;
   }
-  if (cursors.up.isDown || (touchPointer.isDown && touchPointer.y < config.height / 3)) {
+  if (cursors.up.isDown || (touchPointer.isDown && touchPointer.y < config.scale.height / 3)) {
     velocityY = -4;
-  } else if (cursors.down.isDown || (touchPointer.isDown && touchPointer.y > config.height * 2 / 3)) {
+  } else if (cursors.down.isDown || (touchPointer.isDown && touchPointer.y > config.scale.height * 2 / 3)) {
     velocityY = 4;
   }
 
@@ -146,12 +139,11 @@ function update(time, delta) {
 
   face.setVelocity(velocityX * 50, velocityY * 50);
 
-  moveEnemyTowards(pestControl, 2);
-  moveEnemyTowards(unicorn, 1);
-  moveEnemyTowards(bumblebee, 1.5);
+  this.moveEnemyTowards(pestControl, 2);
+  this.moveEnemyTowards(unicorn, 1);
+  this.moveEnemyTowards(bumblebee, 1.5);
 
-  // Use Arcade Physics to check for overlaps
-  this.physics.world.collide(face, [pestControl, unicorn, bumblebee], handleCollision, null, this);
+  this.physics.world.collide(face, [pestControl, unicorn, bumblebee], this.handleCollision, null, this);
 }
 
 function moveEnemyTowards(enemy, speed) {
@@ -160,9 +152,11 @@ function moveEnemyTowards(enemy, speed) {
 }
 
 function handleCollision() {
-  gameOver = true;
-  backgroundMusic.stop();
-  gameOverSound.play();
-  this.add.text(800, 450, 'Game Over!', { fontSize: '64px', fill: '#fff' }).setOrigin(0.5);
-  this.scene.pause();
+  if (invulnerableTime === 0) {
+    gameOver = true;
+    backgroundMusic.stop();
+    gameOverSound.play();
+    this.add.text(800, 450, 'Game Over!', { fontSize: '64px', fill: '#fff' }).setOrigin(0.5);
+    this.scene.pause();
+  }
 }
